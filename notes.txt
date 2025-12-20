@@ -1,0 +1,24 @@
+A scene is really a function that takes in position and angles and produces a color and density
+
+NeRF is a model trained to approximate that scene function, it takes the positions and angles and outputs a similar 
+
+The model only predicts density on position but color as a function of both position and angle.
+- this is done by having 8 layers first output density and a 256d feature vector
+  - then the features + angles are put through one last layer to get color 
+
+Rendering 
+- volume rendering works best with NeRF
+    - volume rendering is a graphics technique to render by sampling at many points and from that computing the appropriate color
+      - a little more complicated than that but basic premise as explained in paper is dividing the path in buckets, randomly selecting from buckets to approximate an integral along the path
+  - 
+
+Optimizations 
+- positional encoding
+      - put it in higher dimensions because the MLP is biased torwards lower dimensional outputs? 
+        - also much more complciated than that 
+          - something to do with fourier features 
+
+- coarse / find 
+  - create a coarse model to generate a pdf along the path 
+    - then have the fine model look at the most important parts of the path
+      - the output is a combination of both models
