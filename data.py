@@ -33,7 +33,7 @@ class DataLoader:
                         )
                         images.append(imageio.imread(frame_path))
                         poses.append(np.array(frame["transform_matrix"]))
-                    images = (np.asarray(images)).astype(np.float32)
+                    images = (np.asarray(images) / 255).astype(np.float32)
                     print(np.max(images))
                     data["images"] = images
                     data["poses"] = poses

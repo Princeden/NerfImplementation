@@ -1,0 +1,23 @@
+load datra
+load images pose
+get camera intrisnics
+
+data loading
+
+sample rays
+
+simple model 
+
+volume rendering
+
+end to end test, rneder smthn
+
+batch processing
+
+simple training loop
+
+positional rendering
+
+heirarchal
+
+view direction
