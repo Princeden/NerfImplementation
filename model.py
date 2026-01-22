@@ -1,4 +1,5 @@
 """
+Code taken from the original implemn
 model.py
 
 NeRF model architecture and training logic:
@@ -386,11 +387,10 @@ def render(
 
     # Render
     all_ret = batchify_rays(rays_batch, chunk, **kwargs)
-
-    # Reshape
-    for k in all_ret:
-        k_shape = [H, W] + list(all_ret[k].shape[1:])
-        all_ret[k] = all_ret[k].reshape(k_shape)
+    if c2w is not None:
+        for k in all_ret:
+            k_shape = [H, W] + list(all_ret[k].shape[1:])
+            all_ret[k] = all_ret[k].reshape(k_shape)
 
     k_extract = ["rgb_map", "disp_map", "acc_map"]
     ret_list = [all_ret[k] for k in k_extract]
@@ -630,7 +630,18 @@ def train():
             )
 
             print(f"[VAL] Iter: {i} PSNR: {val_psnr.item():.2f}")
-
+    path = os.path.join(basedir, expname, "finalNerf.tar")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    torch.save(
+        {
+            "iter": i,
+            "network_state_dict": model.state_dict(),
+            "network_fine_state_dict": model_fine.state_dict() if model_fine else None,
+            "optimizer_state_dict": optimizer.state_dict(),
+        },
+        path,
+    )
+    print(f"Saved checkpoint: {path}")
     print("Training complete!")
 
 
