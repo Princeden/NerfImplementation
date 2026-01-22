@@ -21,7 +21,7 @@ import imageio
 # ============================================================================
 
 
-def get_rays(H, W, focal, c2w):
+def get_rays(H, W, focal, c2w, device="cpu"):
     """
     Generate rays for all pixels in an image.
 
@@ -40,6 +40,8 @@ def get_rays(H, W, focal, c2w):
     )
     i = i.t()  # Transpose to [H, W]
     j = j.t()
+    i = i.to(device)
+    j = j.to(device)
 
     # Directions in camera space
     # X: right, Y: up, Z: backward (camera looks down -Z)
@@ -51,6 +53,7 @@ def get_rays(H, W, focal, c2w):
         ],
         dim=-1,
     )
+    dirs = dirs.to(device)
 
     # Transform directions from camera space to world space
     # rays_d = dirs @ R^T where R is the rotation part of c2w

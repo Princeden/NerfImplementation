@@ -366,7 +366,13 @@ def render(
     """
     if c2w is not None:
         # Generate rays from camera pose
-        rays_o, rays_d = get_rays(H, W, focal, c2w)
+        rays_o, rays_d = get_rays(
+            H,
+            W,
+            focal,
+            c2w,
+            torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+        )
     else:
         rays_o, rays_d = rays
 
