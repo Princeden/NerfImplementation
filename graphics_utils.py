@@ -58,6 +58,7 @@ def get_rays(H, W, focal, c2w, device="cpu"):
     # Transform directions from camera space to world space
     # rays_d = dirs @ R^T where R is the rotation part of c2w
     rays_d = torch.sum(dirs[..., None, :] * c2w[:3, :3], dim=-1)
+    rays_d = rays_d.to(device)
 
     # Ray origins are just the camera position (same for all rays)
     rays_o = c2w[:3, -1].expand(rays_d.shape)
