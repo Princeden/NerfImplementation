@@ -18,11 +18,26 @@ class COLMAP:
         self.device = device
 
     def extract_intrinsics(self):
-        pycolmap.extract_features(self.db_path, self.image_path, self.device)
-        pycolmap.match_exhaustive(self.db_path, self.device)
+        pycolmap.extract_features(
+            str(self.db_path),
+            self.image_path,
+            [],
+            pycolmap.CameraMode.AUTO,
+            "SIMPLE_RADIAL",
+            pycolmap.ImageReaderOptions(),
+            pycolmap.FeatureExtractionOptions(),
+            self.device,
+        )
+        pycolmap.match_exhaustive(
+            self.db_path,
+            pycolmap.FeatureMatchingOptions(),
+            pycolmap.ExhaustivePairingOptions(),
+            pycolmap.TwoViewGeometryOptions(),
+            self.device,
+        )
         num_images = pycolmap.Database(self.db_path).num_images
         print(num_images)
-        
+
         # reconstruction = pycolmap.incremental_mapping(
         #     database_path=self.db_path,
         #     image_path=self.image_path,
