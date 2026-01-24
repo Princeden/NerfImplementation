@@ -20,13 +20,25 @@ class COLMAP:
     def extract_intrinsics(self):
         pycolmap.extract_features(str(self.db_path), str(self.image_path))
         pycolmap.match_exhaustive(str(self.db_path))
+        reconstruction = pycolmap.incremental_mapping(
+                str(self.db_path),
+                str(self.image_path),
+                str(self.image_path)
+        )[0]
+        print(reconstruction)
         db = pycolmap.Database.open(self.db_path)
-        camera = db.read_camera()
-        focal_length = camera.focal_length_x
-        for image in db.read_all_images():
+        focal_length = 0
+        for camera_id in reconstruction.cameras:
+            focal_length = reconstruction.camera(camera_id).focal_length_x
+        #pycolmap.incremental_mapping(str(self.db_path), str(self.image_path), str(self.image_path))
+        for image in reconstruction.images.values():
+            if not image.has_frame_ptr():
+                print("img not regist")
+                continue
             w2c = image.cam_from_world()
             c2w = w2c.inverse()
-            print(c2w.summary())
+            print(c2w)
+            print(c2w.todict())
 
         # reconstruction = pycolmap.incremental_mapping(
         #     database_path=self.db_path,
@@ -41,5 +53,5 @@ class COLMAP:
 
 
 if __name__ == "__main__":
-    colmap = COLMAP("./colmapData/cup", "./data/", pycolmap.Device.cuda)
+    colmap = COLMAP("./testData", "./data/", pycolmap.Device.cuda)
     colmap.extract_intrinsics()
