@@ -455,8 +455,8 @@ def train(
     poses,
     render_poses,
     hwf,
-    save_checkpoints=True,
-    save_images=True,
+    save_checkpoints=False,
+    save_images=False,
 ):
     """Main training function."""
 
