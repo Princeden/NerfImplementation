@@ -409,9 +409,54 @@ def render(
 # ============================================================================
 # TRAINING
 # ============================================================================
+def save_validation_image(
+    img_path, pose, model, network_query_fn, model_fine, N_samples=1, N_importance=1
+):
+    with torch.no_grad():
+        rgb, disp, acc, _ = render(
+            H,
+            W,
+            focal,
+            c2w=pose,
+            network_fn=model,
+            network_query_fn=network_query_fn,
+            N_samples=N_samples,
+            N_importance=N_importance,
+            network_fine=model_fine,
+            perturb=0.0,
+            raw_noise_std=0.0,
+            white_bkgd=False,
+            use_viewdirs=True,
+            near=2.0,
+            far=6.0,
+        )
+
+    imageio.imwrite(img_path, to8b(rgb.cpu().numpy()))
 
 
-def train():
+def save_checkpoint(path, iter, model, model_fine, optimizer):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    torch.save(
+        {
+            "iter": iter,
+            "network_state_dict": model.state_dict(),
+            "network_fine_state_dict": model_fine.state_dict() if model_fine else None,
+            "optimizer_state_dict": optimizer.state_dict(),
+        },
+        path,
+    )
+    print(f"Saved checkpoint: {path}")
+
+
+def train(
+    save_path,
+    images,
+    poses,
+    render_poses,
+    hwf,
+    create_checkpoints=True,
+    save_validation_images=True,
+):
     """Main training function."""
 
     # Configuration
@@ -419,9 +464,6 @@ def train():
     print(f"Using device: {device}")
 
     # Paths
-    basedir = "./logs"
-    expname = "lego_test"
-    datadir = "./data/nerf_synthetic/lego"
 
     # Training params
     N_iters = 200000
@@ -449,12 +491,6 @@ def train():
     chunk = 1024 * 32
     netchunk = 1024 * 64
 
-    # Load data
-    print("Loading data...")
-    images, poses, render_poses, hwf, i_split = load_blender_data(
-        datadir, half_res=True, testskip=8
-    )
-    i_train, i_val, i_test = i_split
     H, W, focal = hwf
     H, W = int(H), int(W)
 
@@ -583,74 +619,19 @@ def train():
             tqdm.write(
                 f"[TRAIN] Iter: {i} Loss: {loss.item():.4f} PSNR: {psnr.item():.2f}"
             )
-
-        # Save checkpoint
-        if i % 10000 == 0 and i > 0:
-            path = os.path.join(basedir, expname, f"{i:06d}.tar")
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            torch.save(
-                {
-                    "iter": i,
-                    "network_state_dict": model.state_dict(),
-                    "network_fine_state_dict": model_fine.state_dict()
-                    if model_fine
-                    else None,
-                    "optimizer_state_dict": optimizer.state_dict(),
-                },
-                path,
-            )
-            print(f"Saved checkpoint: {path}")
-
-        # Render validation
-        if i % 1000 == 0 and i > 0:
-            img_i = np.random.choice(i_val)
-            target = images[img_i]
-            pose = poses[img_i, :3, :4]
-
-            with torch.no_grad():
-                rgb, disp, acc, _ = render(
-                    H,
-                    W,
-                    focal,
-                    chunk=chunk,
-                    c2w=pose,
-                    network_fn=model,
-                    network_query_fn=network_query_fn,
-                    N_samples=N_samples,
-                    N_importance=N_importance,
-                    network_fine=model_fine,
-                    perturb=0.0,
-                    raw_noise_std=0.0,
-                    white_bkgd=white_bkgd,
-                    use_viewdirs=use_viewdirs,
-                    near=2.0,
-                    far=6.0,
-                )
-
-            val_loss = img2mse(rgb, target)
-            val_psnr = mse2psnr(val_loss)
-
-            testimgdir = os.path.join(basedir, expname, "val_imgs")
-            os.makedirs(testimgdir, exist_ok=True)
-            imageio.imwrite(
-                os.path.join(testimgdir, f"{i:06d}.png"), to8b(rgb.cpu().numpy())
-            )
-
-            print(f"[VAL] Iter: {i} PSNR: {val_psnr.item():.2f}")
-    path = os.path.join(basedir, expname, "finalNerf.tar")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    torch.save(
-        {
-            "iter": i,
-            "network_state_dict": model.state_dict(),
-            "network_fine_state_dict": model_fine.state_dict() if model_fine else None,
-            "optimizer_state_dict": optimizer.state_dict(),
-        },
-        path,
-    )
-    print(f"Saved checkpoint: {path}")
+    save_checkpoint(save_path, i, model, model_fine, optimizer)
     print("Training complete!")
 
 
 if __name__ == "__main__":
-    train()
+    basedir = "./logs"
+    expname = "lego_test"
+    datadir = "./data/nerf_synthetic/lego"
+    images, poses, render_poses, hwf, i_split = load_blender_data(
+        datadir, half_res=True, testskip=8
+    )
+    i_train, i_val, i_test = i_split
+    H, W, focal = hwf
+    H, W = int(H), int(W)
+
+    train("./outputs/", images, poses, render_poses)
