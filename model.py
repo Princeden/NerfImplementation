@@ -17,6 +17,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 import imageio
+import random
 
 from graphics_utils import (
     get_rays,
@@ -409,7 +410,7 @@ def render(
 # ============================================================================
 # TRAINING
 # ============================================================================
-def save_validation_image(
+def save_image(
     img_path, pose, model, network_query_fn, model_fine, N_samples=1, N_importance=1
 ):
     with torch.no_grad():
@@ -454,8 +455,8 @@ def train(
     poses,
     render_poses,
     hwf,
-    create_checkpoints=True,
-    save_validation_images=True,
+    save_checkpoints=True,
+    save_images=True,
 ):
     """Main training function."""
 
@@ -619,7 +620,24 @@ def train(
             tqdm.write(
                 f"[TRAIN] Iter: {i} Loss: {loss.item():.4f} PSNR: {psnr.item():.2f}"
             )
-    save_checkpoint(save_path, i, model, model_fine, optimizer)
+        if i & 1000 == 0 and i != 0 and save_images:
+            image_i = random.random() * len(images)
+            pose = poses[image_i, :3, :4]
+            save_checkpoint(save_path, i, model, model_fine, optimizer)
+            save_images(
+                save_path + f"VAL_IMAGE_{i}.png",
+                pose,
+                model,
+                network_query_fn,
+                model_fine,
+                N_samples=N_samples,
+                N_importance=N_importance,
+            )
+            save_image(
+                save_path,
+            )
+        if i & 10000 == 0 and i != 0 and save_checkpoints:
+            save_checkpoint(save_path, i, model, model_fine, optimizer)
     print("Training complete!")
 
 
