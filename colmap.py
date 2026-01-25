@@ -38,6 +38,8 @@ class COLMAP:
 
     def get_nerf_data(self):
         reconstruction = self.get_reconstruction()
+        recon_error = reconstruction.compute_mean_reprojection_error()
+        print(f"Reconstruction Mean Projection Error is {recon_error}")
         focal_length = 0
         for camera_id in reconstruction.cameras:
             focal_length = reconstruction.camera(camera_id).focal_length_x
@@ -45,27 +47,28 @@ class COLMAP:
         poses = []
         render_poses = []
         for image in reconstruction.images.values():
-            im_data = imageio.imread(image.name)
+            print(image.name)
+            im_data = imageio.imread(Path(self.image_path).joinpath( image.name))
             all_images.append(im_data)
             if not image.has_frame_ptr():
                 print("img not registered")
                 continue
             w2c = image.cam_from_world()
-            c2w = w2c.inverse()
-            poses.append[c2w]
+            c2w = w2c.inverse().matrix()
+            poses.append(c2w)
         H, W = all_images[0].shape[:2]
         render_poses = np.stack(
             [
                 pose_spherical(angle, -30.0, 4.0)
                 for angle in np.linspace(-180, 180, 40 + 1)[:-1]
             ],
-            dim=0,
+            0
         )
         return all_images, poses, render_poses, [H, W, focal_length]
 
 
 if __name__ == "__main__":
-    colmap = COLMAP("./testData", "./data/", pycolmap.Device.cuda)
+    colmap = COLMAP("./colmapData/", "./outputs/", pycolmap.Device.cuda)
     all_images, poses, render_poses, hwf = colmap.get_nerf_data()
     print(all_images)
     print(poses)

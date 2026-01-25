@@ -652,4 +652,4 @@ if __name__ == "__main__":
     H, W, focal = hwf
     H, W = int(H), int(W)
 
-    train("./outputs/", images, poses, render_poses)
+    train("./outputs/", images, poses, render_poses, hwf)
