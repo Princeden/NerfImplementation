@@ -12,13 +12,12 @@ class COLMAP:
     output_dir: directory to create path
     """
 
-    def __init__(self, image_path, output_path, device):
+    def __init__(self, image_path, output_path):
         self.image_path = image_path
         self.output_path = Path(output_path)
         self.db_path = Path(image_path).joinpath("database.db")
         self.db_path.touch()
         self.camera_intrinscs = {}
-        self.device = device
 
     def get_reconstruction(self):
         pycolmap.extract_features(str(self.db_path), str(self.image_path))
@@ -48,7 +47,7 @@ class COLMAP:
         render_poses = []
         for image in reconstruction.images.values():
             print(image.name)
-            im_data = imageio.imread(Path(self.image_path).joinpath( image.name))
+            im_data = imageio.imread(Path(self.image_path).joinpath(image.name))
             all_images.append(im_data)
             if not image.has_frame_ptr():
                 print("img not registered")
@@ -62,13 +61,13 @@ class COLMAP:
                 pose_spherical(angle, -30.0, 4.0)
                 for angle in np.linspace(-180, 180, 40 + 1)[:-1]
             ],
-            0
+            0,
         )
         return all_images, poses, render_poses, [H, W, focal_length]
 
 
 if __name__ == "__main__":
-    colmap = COLMAP("./colmapData/", "./outputs/", pycolmap.Device.cuda)
+    colmap = COLMAP("./colmapData/", "./outputs/")
     all_images, poses, render_poses, hwf = colmap.get_nerf_data()
     print(all_images)
     print(poses)
