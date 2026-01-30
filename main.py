@@ -3,6 +3,7 @@ from colmap import COLMAP
 from model import train
 from pathlib import Path
 from graphics_utils import load_blender_data
+import numpy as np
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -38,10 +39,11 @@ if __name__ == "__main__":
     else:
         print("Loading data from JSON")
         all_images, poses, render_poses, hwf, i_split = load_blender_data(args.input)
+    poses = np.concatenate(poses, render_poses)
     train(
         args.output,
         all_images,
-        render_poses,
+        poses,
         hwf,
         args.save_checkpoints,
         args.save_images,
