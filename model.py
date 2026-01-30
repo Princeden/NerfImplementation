@@ -496,6 +496,7 @@ def train(
     H, W, focal = hwf
     H, W = int(H), int(W)
 
+    i_train, i_val, i_test = i_split
     # Handle white background
     if white_bkgd:
         images = images[..., :3] * images[..., -1:] + (1.0 - images[..., -1:])
