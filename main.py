@@ -35,7 +35,7 @@ if __name__ == "__main__":
     if args.use_colmap:
         colmap = COLMAP(args.input, args.output)
         print("Reconstructing Images for Camera Intrinsics")
-        all_images, poses, render_poses, hwf = colmap.get_nerf_data()
+        all_images, poses, render_poses, hwf, i_split = colmap.get_nerf_data()
     else:
         print("Loading data from JSON")
         all_images, poses, render_poses, hwf, i_split = load_blender_data(
@@ -47,6 +47,7 @@ if __name__ == "__main__":
         poses,
         render_poses,
         hwf,
+        i_split,
         args.save_checkpoints,
         args.save_images,
     )
