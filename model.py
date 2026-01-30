@@ -453,6 +453,7 @@ def train(
     save_path,
     images,
     poses,
+    render_poses,
     hwf,
     save_checkpoints=False,
     save_images=False,
