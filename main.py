@@ -39,7 +39,6 @@ if __name__ == "__main__":
         print("Loading data from JSON")
         all_images, poses, render_poses, hwf, i_split = load_blender_data(args.input)
     train(
-        args.input,
         args.output,
         all_images,
         render_poses,
