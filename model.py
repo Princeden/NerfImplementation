@@ -623,7 +623,13 @@ def train(
         if i & 1000 == 0 and i != 0 and save_images:
             image_i = int(random.random() * len(images))
             pose = poses[image_i, :3, :4]
-            save_checkpoint(os.path.join(save_path, f"CHECKPOINT_{i}.tar"), i, model, model_fine, optimizer)
+            save_checkpoint(
+                os.path.join(save_path, f"CHECKPOINT_{i}.pt"),
+                i,
+                model,
+                model_fine,
+                optimizer,
+            )
             print(N_importance)
             save_image(
                 save_path + f"VAL_IMAGE_{i}.png",
@@ -634,9 +640,12 @@ def train(
                 N_samples,
                 N_importance,
             )
-            
+
         if i & 10000 == 0 and i != 0 and save_checkpoints:
-            save_checkpoint(save_path + f"VAL_CHECKPOINT_{i}.tar", i, model, model_fine, optimizer)
+            save_checkpoint(
+                save_path + f"VAL_CHECKPOINT_{i}.pt", i, model, model_fine, optimizer
+            )
+    save_checkpoint(save_path + "FINAL_MODEL.pt", N_iters, model, model_fine, optimizer)
     print("Training complete!")
 
 

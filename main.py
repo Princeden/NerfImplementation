@@ -1,7 +1,7 @@
 import argparse
-from COLMAP import COLMAP
-from main.py import train
-import Path
+from colmap import COLMAP
+from model import train
+from pathlib import Path
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -17,10 +17,17 @@ if __name__ == "__main__":
         "-o",
         type=Path,
         required=True,
-        help="Output directory for checkpoints and logs",
+        help="Output directory for final model and any desired training logs",
+    )
+
+    parser.add_argument(
+        "--save_checkpoints", action=argparse.BooleanOptionalAction, default=False
+    )
+    parser.add_argument(
+        "--save_images", action=argparse.BooleanOptionalAction, default=False
     )
     args = parser.parse_args()
-    colmap = COLMAP(parser.input, parser.output)
+    colmap = COLMAP(args.input, args.output)
     print("Reconstructing Images for Camera Intrinsics")
     all_images, poses, render_poses, hwf = colmap.get_nerf_data()
-    train(parser.input, parser.output, all_images, render_poses, hwf)
+    train(args.input, args.output, all_images, render_poses, hwf)
