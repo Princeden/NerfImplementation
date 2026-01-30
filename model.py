@@ -453,7 +453,6 @@ def train(
     save_path,
     images,
     poses,
-    render_poses,
     hwf,
     save_checkpoints=False,
     save_images=False,
@@ -620,7 +619,7 @@ def train(
             tqdm.write(
                 f"[TRAIN] Iter: {i} Loss: {loss.item():.4f} PSNR: {psnr.item():.2f}"
             )
-        if i & 1000 == 0 and i != 0 and save_images:
+        if i % 1000 == 0 and i != 0 and save_images:
             image_i = int(random.random() * len(images))
             pose = poses[image_i, :3, :4]
             save_checkpoint(
@@ -641,7 +640,7 @@ def train(
                 N_importance,
             )
 
-        if i & 10000 == 0 and i != 0 and save_checkpoints:
+        if i % 10000 == 0 and i != 0 and save_checkpoints:
             save_checkpoint(
                 save_path + f"VAL_CHECKPOINT_{i}.pt", i, model, model_fine, optimizer
             )
