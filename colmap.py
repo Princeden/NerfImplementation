@@ -63,12 +63,16 @@ class COLMAP:
             ],
             0,
         )
-        return all_images, poses, render_poses, [H, W, focal_length]
+
+        n_images = len(all_images)
+        counts = [0, int(n_images * 0.6), int(n_images * 0.8), n_images]
+        i_split = [np.arange(counts[i], counts[i + 1]) for i in range(3)]
+        return all_images, poses, render_poses, [H, W, focal_length], i_split
 
 
 if __name__ == "__main__":
     colmap = COLMAP("./colmapData/", "./outputs/")
-    all_images, poses, render_poses, hwf = colmap.get_nerf_data()
+    all_images, poses, render_poses, hwf, i_split = colmap.get_nerf_data()
     print(all_images)
     print(poses)
     print(render_poses)
