@@ -455,6 +455,7 @@ def train(
     poses,
     render_poses,
     hwf,
+    i_splt,
     save_checkpoints=False,
     save_images=False,
 ):

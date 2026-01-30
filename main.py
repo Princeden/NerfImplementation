@@ -38,7 +38,9 @@ if __name__ == "__main__":
         all_images, poses, render_poses, hwf = colmap.get_nerf_data()
     else:
         print("Loading data from JSON")
-        all_images, poses, render_poses, hwf, i_split = load_blender_data(args.input)
+        all_images, poses, render_poses, hwf, i_split = load_blender_data(
+            args.input, half_res=True
+        )
     train(
         args.output,
         all_images,
