@@ -505,7 +505,6 @@ def train(
     poses = torch.from_numpy(poses).to(device)
 
     print(f"Loaded {len(images)} images, {H}x{W}")
-    print(f"Train: {len(i_train)}, Val: {len(i_val)}, Test: {len(i_test)}")
 
     # Create models
     print("Creating models...")
